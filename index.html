@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choco-Fractions: โรงงานช็อกโกแลตมหัศจรรย์</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        kanit: ['Kanit', 'sans-serif'],
+                        prompt: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        cocoa: {
+                            800: '#3D2314',
+                            700: '#52301C',
+                            600: '#6C4027',
+                            500: '#8A5333',
+                            100: '#F3E5DC',
+                            50: '#FBF7F4',
+                        },
+                        strawberry: '#FF477E',
+                        mint: '#00E676',
+                        blueberry: '#536DFE',
+                        whitechoco: '#FFF176',
+                        gold: '#FFD700'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #2D180C;
+            background-image: radial-gradient(#422513 1px, transparent 0);
+            background-size: 24px 24px;
+            user-select: none;
+        }
+        .choco-card {
+            background: linear-gradient(145deg, #422513, #311A0D);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
+        .choco-button {
+            background: linear-gradient(180deg, #8A5333 0%, #52301C 100%);
+            border-bottom: 4px solid #311A0D;
+            transition: all 0.1s ease;
+        }
+        .choco-button:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+        .gold-button {
+            background: linear-gradient(180deg, #FFD700 0%, #FFA000 100%);
+            border-bottom: 4px solid #C77C00;
+            color: #3D2314;
+        }
+        .gold-button:active {
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .knife-btn.active {
+            ring: 4px solid #FFD700;
+            transform: scale(1.05);
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+        }
+        /* Pulse Animation */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); }
+        }
+        .pulse-gold {
+            animation: pulse-glow 2s infinite;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-cocoa-800/90 border-b border-cocoa-600/50 sticky top-0 z-30 px-4 py-3 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <!-- Brand / Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-700 to-amber-500 flex items-center justify-center text-2xl shadow-lg border border-amber-300/30">
+                    🍫
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-amber-200 leading-tight">Choco-Fractions</h1>
+                    <p class="text-xs text-amber-400/80 font-light">โรงงานช็อกโกแลตมหัศจรรย์ ป.5</p>
+                </div>
+            </div>
+
+            <!-- Stats & Progress -->
+            <div class="flex items-center gap-3 sm:gap-6 bg-cocoa-700/80 px-4 py-1.5 rounded-full border border-cocoa-500/40 text-sm">
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <span class="text-amber-100 font-semibold" id="scoreText">0 คะแนน</span>
+                </div>
+                <div class="h-4 w-px bg-cocoa-500"></div>
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-star text-yellow-400"></i>
+                    <span class="text-yellow-200 font-semibold" id="starsText">0/15</span>
+                </div>
+                <div class="h-4 w-px bg-cocoa-500"></div>
+                <div class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-flag-checkered text-emerald-400"></i>
+                    <span class="text-emerald-200 font-semibold" id="levelText">ออร์เดอร์ 1/5</span>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-cocoa-700 hover:bg-cocoa-600 border border-cocoa-500/50 flex items-center justify-center text-amber-300 transition" title="เปิด/ปิด เสียง">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                </button>
+                <button onclick="openGuideModal()" class="w-9 h-9 rounded-lg bg-cocoa-700 hover:bg-cocoa-600 border border-cocoa-500/50 flex items-center justify-center text-amber-300 transition" title="คู่มือโรงงาน">
+                    <i class="fa-solid fa-book-open"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Game Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow flex flex-col gap-6">
+
+        <!-- Customer Order Card -->
+        <section class="choco-card rounded-2xl p-5 border border-amber-900/60 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl text-amber-300 pointer-events-none">
+                📜
+            </div>
+
+            <div class="flex items-center gap-4 z-10 w-full md:w-auto">
+                <div class="w-16 h-16 rounded-2xl bg-amber-900/80 border-2 border-amber-500/50 flex items-center justify-center text-4xl shrink-0 shadow-inner" id="customerAvatar">
+                    🧙‍♂️
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30 font-medium" id="customerName">ลูกค้า VIP: ท่านจอมเวท</span>
+                        <span class="text-xs text-amber-400/80" id="orderTypeBadge">ภารกิจ: การบวกเศษส่วน</span>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-amber-100 mt-1" id="orderDialogue">
+                        "ช่วยผสมช็อกโกแลตตามคำสั่งซื้อให้ได้ขนาดชิ้นเท่ากันก่อนบรรจุลงกล่องนะ!"
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Fraction Target Equation Card -->
+            <div class="bg-cocoa-800/90 border-2 border-amber-400/60 px-6 py-3 rounded-xl flex items-center gap-4 z-10 shadow-lg">
+                <div class="text-center">
+                    <span class="text-xs text-amber-300 block mb-1">รสแรก</span>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-strawberry tracking-wider" id="frac1Display">1/2</div>
+                </div>
+                <div class="text-2xl font-bold text-amber-300" id="operatorDisplay">+</div>
+                <div class="text-center">
+                    <span class="text-xs text-amber-300 block mb-1">รสที่สอง</span>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-mint tracking-wider" id="frac2Display">1/4</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 1: Estimation Gatekeeper (คาดคะเนก่อนคำนวณ) -->
+        <section id="estimationSection" class="choco-card rounded-2xl p-5 border border-amber-500/40 relative">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-500 text-cocoa-800 font-extrabold text-xs px-2.5 py-1 rounded-full">ขั้นตอนที่ 1</span>
+                    <h3 class="text-base font-bold text-amber-200">คาดคะเนผลลัพธ์ (Fraction Sense Meter)</h3>
+                </div>
+                <span class="text-xs text-amber-300/80"><i class="fa-solid fa-lightbulb text-yellow-400 mr-1"></i>ลองสังเกตปริมาณด้วยสายตาก่อน!</span>
+            </div>
+
+            <p class="text-sm text-amber-100/90 mb-4">
+                ก่อนจะลงมือตัดช็อกโกแลต คิดว่าเมื่อนำช็อกโกแลตทั้งสองชิ้นมารวมกัน/หักออก ปริมาณคำตอบจะอยู่ในระดับใด?
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button onclick="makeEstimation('<0.5')" class="est-btn p-3 rounded-xl bg-cocoa-700/80 hover:bg-amber-800/80 border border-amber-500/30 text-center transition flex flex-col items-center gap-1 group">
+                    <span class="text-2xl">📉</span>
+                    <span class="text-sm font-semibold text-amber-200 group-hover:text-amber-100">น้อยกว่า ½ ถาด</span>
+                    <span class="text-[10px] text-amber-400/70">(&lt; 0.5)</span>
+                </button>
+                <button onclick="makeEstimation('=0.5')" class="est-btn p-3 rounded-xl bg-cocoa-700/80 hover:bg-amber-800/80 border border-amber-500/30 text-center transition flex flex-col items-center gap-1 group">
+                    <span class="text-2xl">⚖️</span>
+                    <span class="text-sm font-semibold text-amber-200 group-hover:text-amber-100">ครึ่งถาดพอดี</span>
+                    <span class="text-[10px] text-amber-400/70">(= 0.5)</span>
+                </button>
+                <button onclick="makeEstimation('>0.5')" class="est-btn p-3 rounded-xl bg-cocoa-700/80 hover:bg-amber-800/80 border border-amber-500/30 text-center transition flex flex-col items-center gap-1 group">
+                    <span class="text-2xl">📈</span>
+                    <span class="text-sm font-semibold text-amber-200 group-hover:text-amber-100">มากกว่า ½ แต่ไม่เต็ม</span>
+                    <span class="text-[10px] text-amber-400/70">(0.5 ถึง 1.0)</span>
+                </button>
+                <button onclick="makeEstimation('>=1.0')" class="est-btn p-3 rounded-xl bg-cocoa-700/80 hover:bg-amber-800/80 border border-amber-500/30 text-center transition flex flex-col items-center gap-1 group">
+                    <span class="text-2xl">🎂</span>
+                    <span class="text-sm font-semibold text-amber-200 group-hover:text-amber-100">เต็มถาดหรือเกิน 1 ถาด</span>
+                    <span class="text-[10px] text-amber-400/70">(&ge; 1.0)</span>
+                </button>
+            </div>
+            
+            <div id="estFeedback" class="hidden mt-3 p-2.5 rounded-lg text-xs font-semibold text-center border"></div>
+        </section>
+
+        <!-- STEP 2: Concrete Interactive Canvas Workspace -->
+        <section class="choco-card rounded-2xl p-5 border border-amber-500/40 flex flex-col gap-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="bg-amber-500 text-cocoa-800 font-extrabold text-xs px-2.5 py-1 rounded-full">ขั้นตอนที่ 2</span>
+                    <h3 class="text-base font-bold text-amber-200">ถาดช็อกโกแลตและมีดเวทมนตร์ (Vertical Partitioning)</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetCurrentTray()" class="text-xs bg-cocoa-700 hover:bg-cocoa-600 text-amber-200 px-3 py-1.5 rounded-lg border border-cocoa-500/50 transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>เริ่มซอยใหม่
+                    </button>
+                </div>
+            </div>
+
+            <!-- Magic Knife Tools Selector -->
+            <div class="bg-cocoa-800/80 p-3 rounded-xl border border-cocoa-600/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 text-xs font-medium text-amber-300">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-base"></i>
+                    <span>เลือกเบอร์มีดเวทมนตร์ (ซอยแนวตั้งเพิ่มช่องย่อย):</span>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center" id="knifeToolbar">
+                    <button onclick="selectKnife(2)" class="knife-btn px-3 py-1.5 rounded-lg bg-cocoa-700 border border-amber-500/40 text-xs font-semibold text-amber-100 hover:bg-amber-700 transition">
+                        🔪 มีดเบอร์ 2 (ซอย 2 ช่อง)
+                    </button>
+                    <button onclick="selectKnife(3)" class="knife-btn px-3 py-1.5 rounded-lg bg-cocoa-700 border border-amber-500/40 text-xs font-semibold text-amber-100 hover:bg-amber-700 transition">
+                        🔪 มีดเบอร์ 3 (ซอย 3 ช่อง)
+                    </button>
+                    <button onclick="selectKnife(4)" class="knife-btn px-3 py-1.5 rounded-lg bg-cocoa-700 border border-amber-500/40 text-xs font-semibold text-amber-100 hover:bg-amber-700 transition">
+                        🔪 มีดเบอร์ 4 (ซอย 4 ช่อง)
+                    </button>
+                    <button onclick="selectKnife(6)" class="knife-btn px-3 py-1.5 rounded-lg bg-cocoa-700 border border-amber-500/40 text-xs font-semibold text-amber-100 hover:bg-amber-700 transition">
+                        🔪 มีดเบอร์ 6 (ซอย 6 ช่อง)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Canvas Container (Cleaner layout without overlapping floating overlays) -->
+            <div class="relative w-full aspect-[2/1] sm:aspect-[2.3/1] bg-cocoa-800 rounded-xl border-2 border-amber-600/60 overflow-hidden shadow-2xl flex items-center justify-center p-2">
+                <canvas id="chocoCanvas" class="w-full h-full rounded-lg cursor-pointer touch-none"></canvas>
+            </div>
+
+            <!-- Separate Instruction Banner (Moved below canvas to avoid text overlap) -->
+            <div id="canvasInstruction" class="bg-cocoa-800/90 border border-amber-500/40 px-4 py-2 rounded-xl text-xs text-amber-200 shadow-md flex items-center gap-2 justify-center text-center">
+                <i class="fa-solid fa-hand-pointer text-amber-400 animate-bounce"></i>
+                <span id="canvasInstructionText">เลือกเบอร์มีดด้านบน แล้วคลิกทาบลงบนแถบช็อกโกแลตเพื่อซอยชิ้น!</span>
+            </div>
+
+            <!-- Status Comparison Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="bg-cocoa-800/80 p-3 rounded-xl border border-cocoa-600/50 flex items-center justify-between">
+                    <span class="text-amber-300">รสที่ 1 (<span id="nameFrac1" class="text-strawberry font-bold">1/2</span>) ซอยแล้วได้:</span>
+                    <span id="resultFrac1" class="font-extrabold text-amber-100 text-sm">ยังไม่ถูกซอย</span>
+                </div>
+                <div class="bg-cocoa-800/80 p-3 rounded-xl border border-cocoa-600/50 flex items-center justify-between">
+                    <span class="text-amber-300">รสที่ 2 (<span id="nameFrac2" class="text-mint font-bold">1/4</span>) ซอยแล้วได้:</span>
+                    <span id="resultFrac2" class="font-extrabold text-amber-100 text-sm">ยังไม่ถูกซอย</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: Abstract Symbolic Section -->
+        <section id="symbolicSection" class="choco-card rounded-2xl p-5 border border-amber-500/40 flex flex-col gap-4">
+            <div class="flex items-center gap-2">
+                <span class="bg-amber-500 text-cocoa-800 font-extrabold text-xs px-2.5 py-1 rounded-full">ขั้นตอนที่ 3</span>
+                <h3 class="text-base font-bold text-amber-200">ถอดรหัสสมการ (Symbolic Equation)</h3>
+            </div>
+
+            <div class="bg-cocoa-800/90 p-4 rounded-xl border border-amber-500/30 flex flex-col gap-3">
+                <div class="text-xs text-amber-300/80 text-center sm:text-left">
+                    <i class="fa-solid fa-code-compare text-amber-400 mr-1"></i>เมื่อซอยชิ้นส่วนให้ขนาดเท่ากันแล้ว สมการจะเปลี่ยนเป็น:
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-base sm:text-lg font-bold py-2">
+                    <!-- Fraction 1 Math Conversion -->
+                    <div class="flex items-center gap-2 bg-cocoa-700/90 px-3.5 py-2 rounded-xl border border-cocoa-500/50">
+                        <span class="text-strawberry font-extrabold" id="symbFrac1Orig">1/2</span>
+                        <span class="text-xs text-amber-300" id="symbMulti1">&times; 2/2 =</span>
+                        <span class="text-amber-100 font-black text-lg" id="symbFrac1New">2/4</span>
+                    </div>
+
+                    <div class="text-amber-300 font-black text-2xl" id="symbOp">+</div>
+
+                    <!-- Fraction 2 Math Conversion -->
+                    <div class="flex items-center gap-2 bg-cocoa-700/90 px-3.5 py-2 rounded-xl border border-cocoa-500/50">
+                        <span class="text-mint font-extrabold" id="symbFrac2Orig">1/4</span>
+                        <span class="text-xs text-amber-300" id="symbMulti2">&times; 1/1 =</span>
+                        <span class="text-amber-100 font-black text-lg" id="symbFrac2New">1/4</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4: Independent Answer Input & Delivery Section -->
+        <section id="answerSection" class="choco-card rounded-2xl p-5 border border-amber-500/40 flex flex-col gap-4">
+            <div class="flex items-center gap-2">
+                <span class="bg-amber-500 text-cocoa-800 font-extrabold text-xs px-2.5 py-1 rounded-full">ขั้นตอนที่ 4</span>
+                <h3 class="text-base font-bold text-amber-200">กรอกคำตอบและส่งมอบ (Answer & Delivery)</h3>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-cocoa-800/90 p-4 rounded-xl border border-amber-500/30">
+                <div class="text-center sm:text-left">
+                    <span class="text-sm font-semibold text-amber-200 block">คำนวณปริมาณช็อกโกแลตรวม:</span>
+                    <span class="text-xs text-amber-400/80">ระบุตัวเศษและตัวส่วนหลังจากบวก/ลบชิ้นย่อย</span>
+                </div>
+
+                <!-- Clean Separated Answer Box -->
+                <div class="flex items-center gap-3 bg-amber-950/80 p-3 rounded-xl border-2 border-amber-400 shadow-lg shrink-0">
+                    <span class="text-sm font-bold text-amber-300">คำตอบ =</span>
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="numInput" placeholder="ตัวเศษ" class="w-16 h-10 bg-cocoa-900 text-center text-amber-100 font-black rounded border border-amber-400/60 focus:outline-none focus:ring-2 focus:ring-amber-300 text-lg" min="0" max="99">
+                        <div class="w-full h-0.5 bg-amber-300 my-1"></div>
+                        <input type="number" id="denInput" placeholder="ตัวส่วน" class="w-16 h-10 bg-cocoa-900 text-center text-amber-100 font-black rounded border border-amber-400/60 focus:outline-none focus:ring-2 focus:ring-amber-300 text-lg" min="1" max="99">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deliver Order Button -->
+            <button id="deliverBtn" onclick="checkFinalAnswer()" class="gold-button w-full py-3.5 rounded-xl text-base font-extrabold tracking-wide shadow-xl flex items-center justify-center gap-2 hover:brightness-110 transition pulse-gold">
+                <span>📦 ส่งมอบช็อกโกแลตให้ลูกค้า!</span>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-cocoa-800 border-t border-cocoa-600/40 py-3 text-center text-xs text-amber-400/60">
+        นวัตกรรมการเรียนรู้คณิตศาสตร์ด้วยแนวคิด CPA | Choco-Fractions Magic Chocolate Factory
+    </footer>
+
+    <!-- MODAL 1: Factory Guide & Rules -->
+    <div id="guideModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="choco-card max-w-xl w-full rounded-2xl p-6 border border-amber-500/50 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-amber-500/30 pb-3">
+                <h3 class="text-xl font-bold text-amber-200 flex items-center gap-2">
+                    📖 กฎของโรงงานช็อกโกแลต
+                </h3>
+                <button onclick="closeGuideModal()" class="text-amber-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-sm text-amber-100/90">
+                <div class="p-3 bg-cocoa-800/80 rounded-xl border border-cocoa-600/50">
+                    <h4 class="font-bold text-amber-300 mb-1">1. กฎทองคำการบรรจุกล่อง:</h4>
+                    <p class="text-xs">ช็อกโกแลตรสชาติต่างๆ จะนำมารวมหรือหักออกกันตรงๆ ไม่ได้ หากขนาดชิ้นย่อยยัง **ไม่เท่ากัน**!</p>
+                </div>
+
+                <div class="p-3 bg-cocoa-800/80 rounded-xl border border-cocoa-600/50">
+                    <h4 class="font-bold text-amber-300 mb-1">2. มีดเวทมนตร์ (Transparent Overlay):</h4>
+                    <p class="text-xs">เลือกเบอร์มีด เช่น มีดเบอร์ 2 (ซอยแบ่ง 2) แล้วคลิกที่ช็อกโกแลตเพื่อซอยชิ้นใหญ่เป็นชิ้นย่อย การซอยมีด **ไม่เพิ่มและไม่ลดเนื้อช็อกโกแลต** แต่ช่วยปรับตัวส่วนให้เท่ากัน!</p>
+                </div>
+
+                <div class="p-3 bg-cocoa-800/80 rounded-xl border border-cocoa-600/50">
+                    <h4 class="font-bold text-amber-300 mb-1">3. ความหมายของการทำตัวส่วนให้เท่ากัน:</h4>
+                    <p class="text-xs">การคูณทั้งเศษและส่วน เช่น $\frac{1}{2} \times \frac{2}{2} = \frac{2}{4}$ คือการใช้มีดเบอร์ 2 ซอยชิ้นส่วน $\frac{1}{2}$ ให้กลายเป็น 2 ชิ้นเล็กนั่นเอง</p>
+                </div>
+            </div>
+
+            <button onclick="closeGuideModal()" class="choco-button w-full py-2.5 rounded-xl font-bold text-amber-200 text-sm mt-2">
+                เข้าใจแล้ว! เริ่มทำช็อกโกแลตเลย
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Level Complete / Order Success -->
+    <div id="victoryModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="choco-card max-w-md w-full rounded-2xl p-6 border-2 border-amber-400 shadow-2xl text-center flex flex-col items-center gap-4">
+            <div class="w-20 h-20 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-5xl animate-bounce">
+                🌟
+            </div>
+
+            <h3 class="text-2xl font-extrabold text-amber-200">ส่งมอบสำเร็จ! Perfect Order!</h3>
+            <p class="text-xs text-amber-300/90" id="victoryMsg">
+                คุณซอยช็อกโกแลตได้ขนาดเท่ากันพอดี และคิดคำนวณได้อย่างถูกต้อง!
+            </p>
+
+            <div class="w-full bg-cocoa-800/90 p-4 rounded-xl border border-amber-500/30 flex justify-around">
+                <div>
+                    <span class="text-[10px] text-amber-400 uppercase block">คะแนนโบนัส</span>
+                    <span class="text-xl font-bold text-emerald-400" id="vicScore">+100</span>
+                </div>
+                <div class="h-8 w-px bg-cocoa-600"></div>
+                <div>
+                    <span class="text-[10px] text-amber-400 uppercase block">ความแม่นยำ</span>
+                    <span class="text-xl font-bold text-yellow-300" id="vicStars">3 ดาว ⭐⭐⭐</span>
+                </div>
+            </div>
+
+            <button onclick="nextLevel()" class="gold-button w-full py-3 rounded-xl font-extrabold text-base shadow-lg">
+                รับออร์เดอร์ถัดไป ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Big 1-Second Error Pop-up Modal -->
+    <div id="wrongModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden pointer-events-none">
+        <div class="bg-gradient-to-b from-rose-600 to-rose-950 border-4 border-rose-300 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl transform scale-100 transition-all duration-200">
+            <div class="text-6xl mb-2 animate-bounce">❌</div>
+            <h3 class="text-2xl font-black text-white tracking-wide" id="wrongModalTitle">ยังไม่ถูกต้อง!</h3>
+            <p class="text-sm text-rose-100 mt-2 font-medium" id="wrongModalBody">ลองคิดคำนวณและนับจำนวนชิ้นย่อยใหม่อีกครั้งนะ</p>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Game Complete / Grand Victory Modal -->
+    <div id="gameCompleteModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="choco-card max-w-md w-full rounded-2xl p-6 border-2 border-amber-400 shadow-2xl text-center flex flex-col items-center gap-4">
+            <div class="w-24 h-24 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-6xl animate-bounce">
+                🏆
+            </div>
+
+            <h3 class="text-3xl font-black text-amber-200">ยินดีด้วย! คุณคือ Master Chocolatier!</h3>
+            <p class="text-sm text-amber-300/90">
+                คุณผ่านออร์เดอร์ช็อกโกแลตครบทุกระดับแล้ว สามารถแก้ปัญหาการทำตัวส่วนให้เท่ากันได้อย่างเชี่ยวชาญ!
+            </p>
+
+            <div class="w-full bg-cocoa-800/90 p-4 rounded-xl border border-amber-500/30 flex justify-around">
+                <div>
+                    <span class="text-xs text-amber-400 uppercase block">คะแนนสะสมรวม</span>
+                    <span class="text-2xl font-black text-emerald-400" id="finalScore">0</span>
+                </div>
+                <div class="h-10 w-px bg-cocoa-600"></div>
+                <div>
+                    <span class="text-xs text-amber-400 uppercase block">ดาวที่ได้รับ</span>
+                    <span class="text-2xl font-black text-yellow-300" id="finalStars">0/15</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="gold-button w-full py-3.5 rounded-xl font-extrabold text-lg shadow-xl pulse-gold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>เริ่มเล่นใหม่อีกครั้ง</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Custom Toast / Feedback Box -->
+    <div id="toastBox" class="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-cocoa-800 border-2 border-amber-400 text-amber-100 p-4 rounded-xl shadow-2xl hidden transition-all duration-300 transform translate-y-2">
+        <div class="flex items-start gap-3">
+            <div class="text-2xl shrink-0" id="toastIcon">⚠️</div>
+            <div class="flex-grow">
+                <h4 class="font-bold text-sm text-amber-200" id="toastTitle">แจ้งเตือนจาก Inspector</h4>
+                <p class="text-xs text-amber-300/90 mt-0.5" id="toastBody">โปรดปรับขนาดชิ้นส่วนช็อกโกแลตให้เท่ากันก่อน</p>
+            </div>
+            <button onclick="hideToast()" class="text-amber-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const LEVELS = [
+            {
+                id: 1,
+                customer: "คุณนายวานิลลา",
+                avatar: "👵",
+                type: "add",
+                title: "การบวกเศษส่วน (ส่วนซอยง่าย)",
+                f1: { n: 1, d: 2, flavor: "strawberry", color: "#FF477E" }, // Strawberry
+                f2: { n: 1, d: 4, flavor: "mint", color: "#00E676" },       // Mint
+                dialogue: "อยากได้ช็อกโกแลตสตรอว์เบอร์รี 1/2 ถาด ผสม มินต์ 1/4 ถาด จ้ะ!",
+                targetNumerator: 3,
+                targetDenominator: 4,
+                estTarget: ">0.5"
+            },
+            {
+                id: 2,
+                customer: "จอมเวทช็อกโก",
+                avatar: "🧙‍♂️",
+                type: "add",
+                title: "การบวกเศษส่วน (ส่วน 3 และ 6)",
+                f1: { n: 1, d: 3, flavor: "blueberry", color: "#536DFE" }, // Blueberry
+                f2: { n: 1, d: 6, flavor: "mint", color: "#00E676" },       // Mint
+                dialogue: "ช่วยผสมบลูเบอร์รี 1/3 ถาด กับมินต์ 1/6 ถาด ให้ที!",
+                targetNumerator: 3, // 3/6 or 1/2
+                targetDenominator: 6,
+                estTarget: "0.5" // 3/6 = 0.5
+            },
+            {
+                id: 3,
+                customer: "เจ้าชายดาร์กโกโก้",
+                avatar: "🤴",
+                type: "sub",
+                title: "การลบเศษส่วน (หักออก)",
+                f1: { n: 2, d: 3, flavor: "blueberry", color: "#536DFE" }, // Blueberry
+                f2: { n: 1, d: 6, flavor: "mint", color: "#00E676" },       // Mint
+                dialogue: "ทำช็อกโกแลตบลูเบอร์รี 2/3 ถาด แล้วหักรสมินต์ออกไป 1/6 ถาด!",
+                targetNumerator: 3, // 4/6 - 1/6 = 3/6
+                targetDenominator: 6,
+                estTarget: "=0.5"
+            },
+            {
+                id: 4,
+                customer: "กัปตันโกโก้",
+                avatar: "🏴‍☠️",
+                type: "add",
+                title: "การบวกส่วนไม่เท่ากัน (ส่วน 2 และ 3)",
+                f1: { n: 1, d: 2, flavor: "strawberry", color: "#FF477E" },
+                f2: { n: 1, d: 3, flavor: "whitechoco", color: "#FFF176" },
+                dialogue: "จัดช็อกโกแลตสตรอว์เบอร์รี 1/2 ถาด + ไวท์ช็อก 1/3 ถาด!",
+                targetNumerator: 5, // 3/6 + 2/6 = 5/6
+                targetDenominator: 6,
+                estTarget: ">0.5"
+            },
+            {
+                id: 5,
+                customer: "เชฟกระทะเวทมนตร์",
+                avatar: "👨‍🍳",
+                type: "sub",
+                title: "การลบส่วนซอยละเอียด",
+                f1: { n: 3, d: 4, flavor: "strawberry", color: "#FF477E" },
+                f2: { n: 1, d: 2, flavor: "mint", color: "#00E676" },
+                dialogue: "นำสตรอว์เบอร์รี 3/4 ถาด หักออกด้วยมินต์ 1/2 ถาด!",
+                targetNumerator: 1, // 3/4 - 2/4 = 1/4
+                targetDenominator: 4,
+                estTarget: "<0.5"
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let score = 0;
+        let totalStars = 0;
+        let soundEnabled = true;
+
+        let activeKnife = null; // Currently selected knife cut number (e.g. 2, 3, 4, 6)
+        let frac1Multiplier = 1; // How many slices applied to frac1
+        let frac2Multiplier = 1; // How many slices applied to frac2
+
+        let userEstimation = null;
+        let estimationPoints = 0;
+
+        // Audio Synth Context & BGM Engine
+        let audioCtx = null;
+        let bgmTimer = null;
+        let bgmStep = 0;
+
+        // Cozy Choco-Factory Pentatonic BGM Sequence (Frequencies in Hz)
+        const BGM_NOTES = [
+            261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63, 392.00,
+            293.66, 349.23, 440.00, 587.33, 440.00, 349.23, 293.66, 440.00
+        ];
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (!bgmTimer && soundEnabled) {
+                startBGM();
+            }
+        }
+
+        function playBGMNote() {
+            if (!soundEnabled || !audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const freq = BGM_NOTES[bgmStep % BGM_NOTES.length];
+                bgmStep++;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc.type = 'triangle'; // Soft warm tone
+                osc.frequency.setValueAtTime(freq, now);
+
+                // Low-pass filter for cozy chocolate atmosphere
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(800, now);
+
+                // Gentle low volume so it doesn't disturb learning
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(0.025, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.36);
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function startBGM() {
+            if (bgmTimer) clearInterval(bgmTimer);
+            bgmStep = 0;
+            bgmTimer = setInterval(playBGMNote, 320); // Gentle rhythmic beat
+        }
+
+        function stopBGM() {
+            if (bgmTimer) {
+                clearInterval(bgmTimer);
+                bgmTimer = null;
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'btn' || type === 'select') {
+                // Crispy button click pop
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(580, now);
+                osc.frequency.exponentialRampToValueAtTime(280, now + 0.06);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.06);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            } else if (type === 'knife') {
+                // Swoosh / cut sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'toast') {
+                // Gentle notification chime
+                [659.25, 880].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.2);
+                });
+            } else if (type === 'success') {
+                // Level completion fanfare
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'triangle';
+                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                    subGain.gain.setValueAtTime(0.2, now + idx * 0.09);
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.start(now + idx * 0.09);
+                    subOsc.stop(now + idx * 0.09 + 0.35);
+                });
+            } else if (type === 'grand_victory') {
+                // Grand Victory Chimes
+                [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51].forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'sine';
+                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    subGain.gain.setValueAtTime(0.25, now + idx * 0.1);
+                    subGain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.5);
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.start(now + idx * 0.1);
+                    subOsc.stop(now + idx * 0.1 + 0.5);
+                });
+            } else if (type === 'error') {
+                // Buzz error sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.setValueAtTime(110, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                initAudio();
+                startBGM();
+                showToast('เปิดเสียงแล้ว', '🔊 เสียงเอฟเฟกต์และเพลง BGM เปิดใช้งานอยู่', 'info');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                stopBGM();
+                showToast('ปิดเสียงแล้ว', '🔇 เสียงเกมทั้งหมดถูกปิดอยู่', 'info');
+            }
+        }
+
+        let canvas, ctx;
+
+        window.onload = function() {
+            canvas = document.getElementById('chocoCanvas');
+            ctx = canvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Play BGM and audio context on initial user interaction
+            const startAudioOnInteraction = () => {
+                initAudio();
+                window.removeEventListener('click', startAudioOnInteraction);
+                window.removeEventListener('touchstart', startAudioOnInteraction);
+            };
+            window.addEventListener('click', startAudioOnInteraction);
+            window.addEventListener('touchstart', startAudioOnInteraction);
+
+            // Global Button Click Sound Effect
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('button') || e.target.closest('.est-btn') || e.target.closest('.knife-btn')) {
+                    playSound('btn');
+                }
+            });
+
+            // Canvas Click / Tap Listener
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                processCanvasHit(x, y);
+            });
+
+            loadLevel(0);
+        };
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            renderCanvas();
+        }
+
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            const lvl = LEVELS[currentLevelIdx];
+
+            // Reset Level variables
+            frac1Multiplier = 1;
+            frac2Multiplier = 1;
+            activeKnife = null;
+            userEstimation = null;
+            estimationPoints = 0;
+
+            // UI Updates
+            document.getElementById('customerAvatar').innerText = lvl.avatar;
+            document.getElementById('customerName').innerText = `ลูกค้า VIP: ${lvl.customer}`;
+            document.getElementById('orderDialogue').innerText = `"${lvl.dialogue}"`;
+            document.getElementById('orderTypeBadge').innerText = lvl.type === 'add' ? 'ภารกิจ: การบวกเศษส่วน' : 'ภารกิจ: การลบเศษส่วน';
+
+            document.getElementById('frac1Display').innerText = `${lvl.f1.n}/${lvl.f1.d}`;
+            document.getElementById('frac2Display').innerText = `${lvl.f2.n}/${lvl.f2.d}`;
+            document.getElementById('operatorDisplay').innerText = lvl.type === 'add' ? '+' : '-';
+
+            document.getElementById('nameFrac1').innerText = `${lvl.f1.n}/${lvl.f1.d}`;
+            document.getElementById('nameFrac1').style.color = lvl.f1.color;
+            document.getElementById('nameFrac2').innerText = `${lvl.f2.n}/${lvl.f2.d}`;
+            document.getElementById('nameFrac2').style.color = lvl.f2.color;
+
+            document.getElementById('levelText').innerText = `ออร์เดอร์ ${currentLevelIdx + 1}/${LEVELS.length}`;
+            document.getElementById('scoreText').innerText = `${score} คะแนน`;
+            document.getElementById('starsText').innerText = `${totalStars}/${LEVELS.length * 3}`;
+
+            // Reset estimation UI
+            const estFeedback = document.getElementById('estFeedback');
+            estFeedback.className = 'hidden mt-3 p-2.5 rounded-lg text-xs font-semibold text-center border';
+            document.querySelectorAll('.est-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-800'));
+
+            // Clear inputs
+            document.getElementById('numInput').value = '';
+            document.getElementById('denInput').value = '';
+
+            updateKnifeButtonsUI();
+            updateSymbolicUI();
+            renderCanvas();
+        }
+
+        function makeEstimation(choice) {
+            playSound('select');
+            userEstimation = choice;
+            const lvl = LEVELS[currentLevelIdx];
+
+            document.querySelectorAll('.est-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-800'));
+            event.currentTarget.classList.add('ring-2', 'ring-amber-400', 'bg-amber-800');
+
+            // Calculate actual ratio
+            let actual;
+            if (lvl.type === 'add') {
+                actual = (lvl.f1.n / lvl.f1.d) + (lvl.f2.n / lvl.f2.d);
+            } else {
+                actual = (lvl.f1.n / lvl.f1.d) - (lvl.f2.n / lvl.f2.d);
+            }
+
+            let correctChoice = '';
+            if (actual < 0.5) correctChoice = '<0.5';
+            else if (Math.abs(actual - 0.5) < 0.001) correctChoice = '=0.5';
+            else if (actual > 0.5 && actual < 1.0) correctChoice = '>0.5';
+            else correctChoice = '>=1.0';
+
+            const estFeedback = document.getElementById('estFeedback');
+            estFeedback.classList.remove('hidden');
+
+            if (choice === correctChoice) {
+                estimationPoints = 50;
+                estFeedback.className = 'mt-3 p-2.5 rounded-lg text-xs font-semibold text-center border bg-emerald-900/60 border-emerald-400 text-emerald-200';
+                estFeedback.innerHTML = `🎯 <b>คาดคะเนถูกต้อง!</b> คุณมี Fraction Sense ที่ยอดเยี่ยม (+50 คะแนน bonus)`;
+                playSound('success');
+            } else {
+                estimationPoints = 10;
+                estFeedback.className = 'mt-3 p-2.5 rounded-lg text-xs font-semibold text-center border bg-amber-900/60 border-amber-400 text-amber-200';
+                estFeedback.innerHTML = `💡 <b>เกือบถูกแล้ว!</b> ไม่เป็นไร ลองใช้มีดเวทมนตร์ซอยชิ้นส่วนจริงได้เลย`;
+            }
+        }
+
+        function selectKnife(num) {
+            playSound('select');
+            activeKnife = num;
+            updateKnifeButtonsUI();
+
+            const instruction = document.getElementById('canvasInstructionText');
+            instruction.innerText = `ถือมีดเบอร์ ${num} แล้ว! คลิกบนแถบช็อกโกแลตรสแรกหรือรสสอง เพื่อซอยเป็น ${num} ช่องย่อย`;
+        }
+
+        function updateKnifeButtonsUI() {
+            document.querySelectorAll('.knife-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (activeKnife) {
+                const btns = document.querySelectorAll('.knife-btn');
+                btns.forEach(btn => {
+                    if (btn.innerText.includes(`เบอร์ ${activeKnife}`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            processCanvasHit(x, y);
+        }
+
+        function processCanvasHit(x, y) {
+            if (!activeKnife) {
+                showToast('เลือกมีดก่อน!', 'กรุณาเลือกเบอร์มีดเวทมนตร์ด้านบนก่อนนำมาซอยช็อกโกแลต', 'warning');
+                playSound('error');
+                return;
+            }
+
+            const lvl = LEVELS[currentLevelIdx];
+            const h = canvas.height;
+            const barHeight = h * 0.32;
+            const y1 = h * 0.15;
+            const y2 = h * 0.58;
+
+            // Check if clicked Bar 1 or Bar 2
+            if (y >= y1 && y <= y1 + barHeight) {
+                // Bar 1 clicked
+                frac1Multiplier = activeKnife;
+                playSound('knife');
+                showToast('ซอยช็อกโกแลตรสแรกแล้ว!', `ซอยแบ่งแนวตั้งเป็น ${activeKnife} ช่องย่อยเท่ากัน`, 'info');
+            } else if (y >= y2 && y <= y2 + barHeight) {
+                // Bar 2 clicked
+                frac2Multiplier = activeKnife;
+                playSound('knife');
+                showToast('ซอยช็อกโกแลตรสที่สองแล้ว!', `ซอยแบ่งแนวตั้งเป็น ${activeKnife} ช่องย่อยเท่ากัน`, 'info');
+            }
+
+            renderCanvas();
+            updateSymbolicUI();
+        }
+
+        function renderCanvas() {
+            if (!ctx) return;
+            const w = canvas.width;
+            const h = canvas.height;
+            const lvl = LEVELS[currentLevelIdx];
+
+            // Clear background
+            ctx.fillStyle = '#311A0D';
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw Tray Outer Frame
+            ctx.strokeStyle = '#8A5333';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(10, 10, w - 20, h - 20);
+
+            const marginX = 24;
+            const barW = w - marginX * 2;
+            const barH = h * 0.32;
+
+            const y1 = h * 0.15;
+            const y2 = h * 0.58;
+
+            // Draw Bar 1 (Fraction 1) - Strict Vertical Cut Layout
+            drawFractionBar(marginX, y1, barW, barH, lvl.f1, frac1Multiplier, "รสที่ 1: " + lvl.f1.flavor);
+
+            // Draw Bar 2 (Fraction 2) - Strict Vertical Cut Layout
+            drawFractionBar(marginX, y2, barW, barH, lvl.f2, frac2Multiplier, "รสที่ 2: " + lvl.f2.flavor);
+        }
+
+        function drawFractionBar(x, y, totalW, h, frac, knifeMult, label) {
+            // Draw empty tray background slot (1 Unit)
+            ctx.fillStyle = '#221107';
+            ctx.fillRect(x, y, totalW, h);
+            ctx.strokeStyle = '#52301C';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, totalW, h);
+
+            // Calculate actual fraction width
+            const origTotalPieces = frac.d;
+            const filledPieces = frac.n;
+            const unitPieceWidth = totalW / origTotalPieces;
+
+            // Draw filled chocolate blocks
+            ctx.fillStyle = frac.color;
+            for (let i = 0; i < filledPieces; i++) {
+                const px = x + i * unitPieceWidth;
+                ctx.fillRect(px + 2, y + 2, unitPieceWidth - 4, h - 4);
+
+                // Add 3D Chocolate highlight bevel
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.fillRect(px + 2, y + 2, unitPieceWidth - 4, 5);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.fillRect(px + 2, y + h - 7, unitPieceWidth - 4, 5);
+                ctx.fillStyle = frac.color;
+            }
+
+            // 1. Draw Original Vertical Division Grid Lines
+            ctx.strokeStyle = '#110803';
+            ctx.lineWidth = 3;
+            for (let i = 1; i < origTotalPieces; i++) {
+                const gx = x + i * unitPieceWidth;
+                ctx.beginPath();
+                ctx.moveTo(gx, y);
+                ctx.lineTo(gx, y + h);
+                ctx.stroke();
+            }
+
+            // 2. Draw Vertical Knife Sub-divisions (Strict Vertical Cut)
+            if (knifeMult > 1) {
+                const totalSubPieces = origTotalPieces * knifeMult;
+                const subPieceWidth = totalW / totalSubPieces;
+
+                // Gold knife overlay highlight
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.12)';
+                ctx.fillRect(x, y, totalW, h);
+
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 3]);
+
+                for (let j = 1; j < totalSubPieces; j++) {
+                    const sx = x + j * subPieceWidth;
+                    ctx.beginPath();
+                    ctx.moveTo(sx, y);
+                    ctx.lineTo(sx, y + h);
+                    ctx.stroke();
+                }
+                ctx.setLineDash([]); // Reset line dash
+            }
+
+            // Top Header Badge Label (Drawn above bar to prevent UI overlap)
+            ctx.fillStyle = '#FFE082';
+            ctx.font = 'bold 13px Kanit';
+            const curNumerator = frac.n * knifeMult;
+            const curDenominator = frac.d * knifeMult;
+            const subTag = knifeMult > 1 ? ` ➔ ซอยแล้ว: ${curNumerator}/${curDenominator} ชิ้น` : '';
+            ctx.fillText(`${label} (เดิม ${frac.n}/${frac.d})${subTag}`, x + 4, y - 6);
+        }
+
+        function resetCurrentTray() {
+            playSound('select');
+            frac1Multiplier = 1;
+            frac2Multiplier = 1;
+            renderCanvas();
+            updateSymbolicUI();
+            showToast('รีเซ็ตถาดสำเร็จ', 'ยกเลิกแผ่นใสมีดเวทมนตร์ทั้งหมดแล้ว', 'info');
+        }
+
+        function updateSymbolicUI() {
+            const lvl = LEVELS[currentLevelIdx];
+
+            const newD1 = lvl.f1.d * frac1Multiplier;
+            const newN1 = lvl.f1.n * frac1Multiplier;
+
+            const newD2 = lvl.f2.d * frac2Multiplier;
+            const newN2 = lvl.f2.n * frac2Multiplier;
+
+            // UI Result Status
+            document.getElementById('resultFrac1').innerText = frac1Multiplier > 1 ? `${newN1}/${newD1}` : `${lvl.f1.n}/${lvl.f1.d} (ยังไม่ถูกซอย)`;
+            document.getElementById('resultFrac2').innerText = frac2Multiplier > 1 ? `${newN2}/${newD2}` : `${lvl.f2.n}/${lvl.f2.d} (ยังไม่ถูกซอย)`;
+
+            // Symbolic Equation Breakdown
+            document.getElementById('symbFrac1Orig').innerText = `${lvl.f1.n}/${lvl.f1.d}`;
+            document.getElementById('symbMulti1').innerText = `\u00D7 ${frac1Multiplier}/${frac1Multiplier} =`;
+            document.getElementById('symbFrac1New').innerText = `${newN1}/${newD1}`;
+
+            document.getElementById('symbFrac2Orig').innerText = `${lvl.f2.n}/${lvl.f2.d}`;
+            document.getElementById('symbMulti2').innerText = `\u00D7 ${frac2Multiplier}/${frac2Multiplier} =`;
+            document.getElementById('symbFrac2New').innerText = `${newN2}/${newD2}`;
+
+            document.getElementById('symbOp').innerText = lvl.type === 'add' ? '+' : '-';
+        }
+
+        function checkFinalAnswer() {
+            const lvl = LEVELS[currentLevelIdx];
+
+            const newD1 = lvl.f1.d * frac1Multiplier;
+            const newN1 = lvl.f1.n * frac1Multiplier;
+
+            const newD2 = lvl.f2.d * frac2Multiplier;
+            const newN2 = lvl.f2.n * frac2Multiplier;
+
+            // RULE CHECK 1: Common Denominator Match
+            if (newD1 !== newD2) {
+                showWrongPopup('ผิดกฎโรงงาน!', `ขนาดชิ้นย่อยยังไม่เท่ากัน! (รสแรกส่วนเป็น ${newD1}, รสสองส่วนเป็น ${newD2})`);
+                return;
+            }
+
+            // Get user inputs
+            const numInput = parseInt(document.getElementById('numInput').value);
+            const denInput = parseInt(document.getElementById('denInput').value);
+
+            if (isNaN(numInput) || isNaN(denInput) || denInput <= 0) {
+                showWrongPopup('กรอกตัวเลขไม่ครบ!', 'กรุณากรอกทั้งตัวเศษและตัวส่วนในช่องคำตอบ');
+                return;
+            }
+
+            // Calculate expected target fraction value
+            let expectedNum;
+            if (lvl.type === 'add') {
+                expectedNum = newN1 + newN2;
+            } else {
+                expectedNum = newN1 - newN2;
+            }
+            const expectedDen = newD1;
+
+            // Check if fraction values match equivalent ratio
+            const isCorrect = (numInput * expectedDen === expectedNum * denInput);
+
+            if (isCorrect) {
+                // VICTORY!
+                playSound('success');
+                const lvlScore = 100 + estimationPoints;
+                score += lvlScore;
+                totalStars += 3;
+
+                document.getElementById('vicScore').innerText = `+${lvlScore}`;
+                document.getElementById('vicStars').innerText = `⭐⭐⭐ (3 ดาว)`;
+                document.getElementById('scoreText').innerText = `${score} คะแนน`;
+                document.getElementById('starsText').innerText = `${totalStars}/${LEVELS.length * 3}`;
+
+                document.getElementById('victoryModal').classList.remove('hidden');
+            } else {
+                showWrongPopup('คำตอบยังไม่ถูกต้อง!', `ลองนับรวม/หักจำนวนชิ้นย่อยขนาด ${newD1} ใหม่อีกครั้งนะ`);
+            }
+        }
+
+        function showWrongPopup(title, body) {
+            playSound('error');
+            const wrongModal = document.getElementById('wrongModal');
+            document.getElementById('wrongModalTitle').innerText = title;
+            document.getElementById('wrongModalBody').innerText = body;
+
+            wrongModal.classList.remove('hidden');
+
+            // Hide automatically after 1 second (1000ms)
+            setTimeout(() => {
+                wrongModal.classList.add('hidden');
+            }, 1000);
+        }
+
+        function nextLevel() {
+            document.getElementById('victoryModal').classList.add('hidden');
+            if (currentLevelIdx + 1 < LEVELS.length) {
+                loadLevel(currentLevelIdx + 1);
+            } else {
+                // Game Completed Grand Victory Modal
+                playSound('grand_victory');
+                document.getElementById('finalScore').innerText = `${score} คะแนน`;
+                document.getElementById('finalStars').innerText = `${totalStars}/${LEVELS.length * 3} ⭐`;
+                document.getElementById('gameCompleteModal').classList.remove('hidden');
+            }
+        }
+
+        function restartGame() {
+            playSound('select');
+            score = 0;
+            totalStars = 0;
+            document.getElementById('gameCompleteModal').classList.add('hidden');
+            loadLevel(0);
+        }
+
+        function showToast(title, body, type = 'warning') {
+            playSound('toast');
+            const toast = document.getElementById('toastBox');
+            const icon = document.getElementById('toastIcon');
+            const tTitle = document.getElementById('toastTitle');
+            const tBody = document.getElementById('toastBody');
+
+            tTitle.innerText = title;
+            tBody.innerText = body;
+
+            if (type === 'warning') {
+                icon.innerText = '⚠️';
+                toast.className = 'fixed bottom-6 right-6 z-50 max-w-sm w-full bg-cocoa-800 border-2 border-amber-400 text-amber-100 p-4 rounded-xl shadow-2xl transition-all duration-300';
+            } else if (type === 'danger') {
+                icon.innerText = '❌';
+                toast.className = 'fixed bottom-6 right-6 z-50 max-w-sm w-full bg-cocoa-800 border-2 border-rose-500 text-amber-100 p-4 rounded-xl shadow-2xl transition-all duration-300';
+            } else if (type === 'info') {
+                icon.innerText = '✨';
+                toast.className = 'fixed bottom-6 right-6 z-50 max-w-sm w-full bg-cocoa-800 border-2 border-emerald-400 text-amber-100 p-4 rounded-xl shadow-2xl transition-all duration-300';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2');
+            }, 10);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toastBox');
+            toast.classList.add('hidden');
+        }
+
+        function openGuideModal() {
+            playSound('select');
+            document.getElementById('guideModal').classList.remove('hidden');
+        }
+
+        function closeGuideModal() {
+            playSound('select');
+            document.getElementById('guideModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
